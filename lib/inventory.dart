@@ -1,4 +1,8 @@
 import 'package:flutter/material.dart';
+<<<<<<< HEAD
+=======
+import 'package:workshop_manager/procurementList.dart';
+>>>>>>> 2c88c6a (Initial commit)
 
 import 'SparePartDetailPage.dart';
 
@@ -38,9 +42,15 @@ class InventoryPage extends StatelessWidget {
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
             child: Row(
               children: [
+<<<<<<< HEAD
                 _summaryCard("Parts In Stock", "6"),
                 const SizedBox(width: 16),
                 _summaryCard("Procurement Req.", "5"),
+=======
+                _summaryCard("Parts In Stock", "6", context),
+                const SizedBox(width: 16),
+                _summaryCard("Procurement Req.", "5", context),
+>>>>>>> 2c88c6a (Initial commit)
               ],
             ),
           ),
@@ -108,6 +118,7 @@ class InventoryPage extends StatelessWidget {
   }
 
   // Summary Card Widget
+<<<<<<< HEAD
   static Widget _summaryCard(String title, String value) {
     return Expanded(
       child: Container(
@@ -132,6 +143,40 @@ class InventoryPage extends StatelessWidget {
               ),
             ),
           ],
+=======
+  static Widget _summaryCard(String title, String value, BuildContext context) {
+    return Expanded(
+      child: GestureDetector(
+        onTap: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => ProcurementPage()),
+          );
+        },
+        child: Container(
+          padding: const EdgeInsets.symmetric(vertical: 16),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Column(
+            children: [
+              Text(
+                title,
+                style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                value,
+                style: const TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.blue,
+                ),
+              ),
+            ],
+          ),
+>>>>>>> 2c88c6a (Initial commit)
         ),
       ),
     );
