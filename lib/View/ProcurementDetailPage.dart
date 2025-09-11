@@ -1,22 +1,16 @@
 import 'package:flutter/material.dart';
 
 class ProcurementDetailPage extends StatelessWidget {
-  final String partName;
-  final int quantity;
+  final int procurementId;
   final String requiredDate;
-  final String remarks;
-  final String receivedBy;
   final String status;
 
   const ProcurementDetailPage({
-    Key? key,
-    required this.partName,
-    required this.quantity,
+    super.key,
+    required this.procurementId,
     required this.requiredDate,
-    required this.remarks,
-    required this.receivedBy,
     required this.status,
-  }) : super(key: key);
+  });
 
   Color getStatusColor(String status) {
     switch (status) {

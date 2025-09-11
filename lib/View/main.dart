@@ -1,8 +1,15 @@
 import 'package:flutter/material.dart';
-
+import 'package:supabase_flutter/supabase_flutter.dart';
 import 'inventory.dart';
 
-void main() {
+void main() async{
+  WidgetsFlutterBinding.ensureInitialized();
+
+  await Supabase.initialize(
+    url: 'https://kebauzussqhnrzptfksi.supabase.co',
+    anonKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtlYmF1enVzc3FobnJ6cHRma3NpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTczMjc1MjcsImV4cCI6MjA3MjkwMzUyN30._ySYgOlA6cR_X3nXFDzsX7i-j2j86sQ0HrOYQbpHtVk',
+  );
+
   runApp(const MyApp());
 }
 
@@ -144,6 +151,15 @@ class MyHomePage extends StatelessWidget {
                         ],
                       ),
                     ),
+                  ),
+                  ElevatedButton(
+                    onPressed: () async {
+                      final response = await Supabase.instance.client
+                          .from('Customers')
+                          .select();
+                      print(response);
+                    },
+                    child: const Text("Fetch Data"),
                   ),
                 ],
               ),

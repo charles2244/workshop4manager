@@ -1,18 +1,49 @@
+// View/SparePartDetailPage.dart
 import 'package:flutter/material.dart';
+import '../Controls/inventory_controller.dart';
+import '../Model/usage_history_model.dart';
 
-class SparePartDetailPage extends StatelessWidget {
+class SparePartDetailPage extends StatefulWidget {
+  final int sparePartId;
   final String name;
-  final String location;
-  final int quantity;
-  final String imagePath;
+  final int qty;
 
   const SparePartDetailPage({
     super.key,
+    required this.sparePartId,
     required this.name,
-    required this.location,
-    required this.quantity,
-    required this.imagePath,
+    required this.qty,
   });
+
+  @override
+  State<SparePartDetailPage> createState() => _SparePartDetailPageState();
+}
+
+class _SparePartDetailPageState extends State<SparePartDetailPage> {
+  final InventoryController controller = InventoryController();
+  List<UsageHistory> usageHistory = [];
+  bool isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    loadUsageHistory();
+  }
+
+  Future<void> loadUsageHistory() async {
+    try {
+      final history = await controller.fetchUsageHistory(widget.sparePartId);
+      setState(() {
+        usageHistory = history;
+        isLoading = false; // Ensure this always runs
+      });
+    } catch (e) {
+      print("Error fetching usage history: $e");
+      setState(() {
+        isLoading = false; // Prevent infinite loading even on error
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -25,14 +56,11 @@ class SparePartDetailPage extends StatelessWidget {
             children: [
               IconButton(
                 icon: const Icon(Icons.arrow_back, color: Colors.white),
-                onPressed: () {
-                  Navigator.pop(context);
-                },
+                onPressed: () => Navigator.pop(context),
               ),
               const SizedBox(width: 100),
               const Text(
                 'Usage History',
-                //textAlign: TextAlign.center,
                 style: TextStyle(
                   color: Colors.white,
                   fontSize: 20,
@@ -42,19 +70,18 @@ class SparePartDetailPage extends StatelessWidget {
             ],
           ),
 
-          // Summary Cards
+          // Summary Card
           Container(
             color: const Color(0xFF2c3e50),
             padding: const EdgeInsets.symmetric(horizontal: 100, vertical: 20),
             child: Row(
               children: [
-                _summaryCard("Current Quantity", "50"),
-                const SizedBox(width: 0),
+                _summaryCard("Current Quantity", widget.qty.toString()),
               ],
             ),
           ),
 
-          // Spare Parts Container
+          // Usage History List
           Expanded(
             child: Container(
               decoration: const BoxDecoration(
@@ -65,57 +92,56 @@ class SparePartDetailPage extends StatelessWidget {
                 ),
               ),
               child: Column(
+                // This Column already exists or should exist to hold multiple children
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                // Optional: if you want the text/header to stretch
                 children: [
-                  // Spare Parts Header
+                  // Spare Part Name Header
                   Padding(
                     padding: const EdgeInsets.symmetric(
                       horizontal: 16,
-                      vertical: 10,
+                      vertical: 16,
                     ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Row(
-                          children: [
-                            SizedBox(width: 5),
-                            Text(
-                              name,
-                              style: const TextStyle(
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
+                    child: Text(
+                      // REMOVE 'const'
+                      widget.name, // Display the name of the current spare part
+                      textAlign: TextAlign.center, // Center the text
+                      style: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 18,
+                        color:
+                            Colors
+                                .black87, // Ensure good contrast on white background
+                      ),
                     ),
                   ),
-
-                  // Spare Parts List
-                  Expanded(
-                    child: ListView(
-                      padding: const EdgeInsets.all(0),
-                      children: [
-                        Text("Usage History"),
-                        Container(
-                          height: 2, // thickness of the line
-                          decoration: BoxDecoration(
-                            color: Colors.black, // solid line color
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.grey.withOpacity(0.5), // shadow color
-                                spreadRadius: 1,
-                                blurRadius: 4,
-                                offset: Offset(0, 2), // shadow position
-                              ),
-                            ],
-                          ),
-                        ),
-                        _sparePartUsage("14/06/2025", "Charles Leong", 2),
-                        _sparePartUsage("02/06/2025", "Jeff Tan", 1),
-                        _sparePartUsage("13/05/2025", "John Wick", 2),
-                        _sparePartUsage("20/04/2025", "Jennie Tan", 3),
-                      ],
+                  // Optional: Separator Line
+                  Container(
+                    height: 1,
+                    margin: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 4,
                     ),
+                    color: Colors.grey.shade300,
+                  ),
+
+                  // Existing Usage History List (or loading indicator)
+                  Expanded(
+                    child:
+                        isLoading
+                            ? const Center(child: CircularProgressIndicator())
+                            : ListView.builder(
+                              padding: const EdgeInsets.all(0),
+                              itemCount: usageHistory.length,
+                              itemBuilder: (context, index) {
+                                final record = usageHistory[index];
+                                return _sparePartUsage(
+                                  record.usedAt.toString().split(" ")[0],
+                                  record.mechanicName,
+                                  record.quantityUsed,
+                                );
+                              },
+                            ),
                   ),
                 ],
               ),
@@ -126,7 +152,7 @@ class SparePartDetailPage extends StatelessWidget {
     );
   }
 
-  // Summary Card Widget
+  // Summary Card
   static Widget _summaryCard(String title, String value) {
     return Expanded(
       child: Container(
@@ -156,7 +182,7 @@ class SparePartDetailPage extends StatelessWidget {
     );
   }
 
-  // Spare Part Item Widget
+  // Usage History Item
   static Widget _sparePartUsage(String date, String mecName, int qty) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -171,7 +197,7 @@ class SparePartDetailPage extends StatelessWidget {
                 "Mechanic Name: ",
                 style: TextStyle(fontWeight: FontWeight.w600),
               ),
-              Expanded(child: Text(mecName, textAlign: TextAlign.right,)),
+              Expanded(child: Text(mecName, textAlign: TextAlign.right)),
             ],
           ),
           const SizedBox(height: 4),
@@ -191,22 +217,23 @@ class SparePartDetailPage extends StatelessWidget {
                   ),
                 ),
               ),
+              const Text(' Pcs'),
             ],
           ),
           Container(
-            height: 2, // thickness of the line
+            height: 2,
             decoration: BoxDecoration(
-              color: Colors.black, // solid line color
+              color: Colors.black,
               boxShadow: [
                 BoxShadow(
-                  color: Colors.grey.withOpacity(0.5), // shadow color
+                  color: Colors.grey.withOpacity(0.5),
                   spreadRadius: 1,
                   blurRadius: 4,
-                  offset: Offset(0, 2), // shadow position
+                  offset: const Offset(0, 2),
                 ),
               ],
             ),
-          )
+          ),
         ],
       ),
     );
